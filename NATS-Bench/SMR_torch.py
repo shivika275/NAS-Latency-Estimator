@@ -63,7 +63,7 @@ def latency(api_main,i,dataset='cifar10'):
 
 
 
-api = create('NATS-tss-v1_0-3ffb9-simple', 'tss', fast_mode=True, verbose=True)
+api = create('NATS-tss-v1_0-3ffb9-simple', 'tss', fast_mode=True, verbose=False)
 print(len(api.meta_archs))
 
 root_dir = 'output_csv'
