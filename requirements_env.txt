@@ -80,7 +80,6 @@ easydict==1.10
 ecos==2.0.12
 editdistance==0.6.2
 eerepr==0.0.4
-en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.6.0/en_core_web_sm-3.6.0-py3-none-any.whl#sha256=83276fc78a70045627144786b52e1f2728ad5e29e5e43916ec37ea9c26a11212
 entrypoints==0.4
 et-xmlfile==1.1.0
 etils==1.5.1
@@ -161,7 +160,6 @@ ipytree==0.2.2
 ipywidgets==7.7.1
 itsdangerous==2.1.2
 jax==0.4.16
-jaxlib @ https://storage.googleapis.com/jax-releases/cuda11/jaxlib-0.4.16+cuda11.cudnn86-cp310-cp310-manylinux2014_x86_64.whl#sha256=78b3a9acfda4bfaae8a1dc112995d56454020f5c02dba4d24c40c906332efd4a
 jeepney==0.7.1
 jieba==0.42.1
 Jinja2==3.1.2
