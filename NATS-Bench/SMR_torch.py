@@ -16,15 +16,18 @@ import psutil
 
 
 def cuda_time() -> float:
-    torch.cuda.synchronize()
+    if torch.cuda.is_available():
+        torch.cuda.synchronize()
     return time.perf_counter()
 @torch.inference_mode()
-def measure(model, img_size, num_repeats=500, num_warmup=500):
+def measure(model, img_size, num_repeats=50, num_warmup=10):
     # model.cuda()
     model.eval()
 
     # backbone = model.backbone
-    inputs = torch.randn(4, 3, img_size, img_size).cuda()
+    inputs = torch.randn(4, 3, img_size, img_size)
+    if torch.cuda.is_available():
+        inputs = inputs.cuda()
 
     latencies = []
     for k in range(num_repeats + num_warmup):
@@ -63,8 +66,7 @@ def latency(api_main,i,dataset='cifar10'):
 api = create('NATS-tss-v1_0-3ffb9-simple', 'tss', fast_mode=True, verbose=True)
 print(len(api.meta_archs))
 
-
-root_dir = ''
+root_dir = 'output_csv'
 
 if torch.cuda.is_available():
   hw = str(GPUtil.getGPUs()[0].name)
