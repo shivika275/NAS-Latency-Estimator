@@ -53,7 +53,7 @@ def latency(api_main,i,dataset='cifar10'):
     device = torch.device("cpu")
   network = network.to(device)
   if(dataset == 'ImageNet16-120'):
-    img_size = 256
+    img_size = 128
   else:
     img_size = 32
   latency = measure(network,img_size)
