@@ -5,4 +5,3 @@ git clone https://github.com/D-X-Y/AutoDL-Projects
 cd AutoDL-Projects
 python3 -m pip install .
 cd ../
-python3 SMR_torch.py
