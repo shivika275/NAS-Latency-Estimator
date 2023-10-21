@@ -11,6 +11,8 @@ import time
 from tqdm import tqdm
 import pandas as pd
 import os
+import multiprocessing
+import psutil
 
 
 def cuda_time() -> float:
@@ -68,7 +70,15 @@ if torch.cuda.is_available():
   hw = str(GPUtil.getGPUs()[0].name)
 else:
   uname = platform.uname()
-  hw = str(uname.machine) +'_'+str(uname.processor)
+  num_cores = multiprocessing.cpu_count()
+  memory_info = psutil.virtual_memory()
+  total_memory = memory_info.total
+  total_memory_gb = total_memory / (1024 ** 3)
+  hw = str(uname.machine) +'_'+str(uname.processor) +'_'+str(num_cores) +'_'+str(total_memory_gb)
+
+# Convert memory size to GB
+
+
 if(not(os.path.exists(os.path.join(root_dir,hw)))):
   os.makedirs(os.path.join(root_dir,hw))
 
