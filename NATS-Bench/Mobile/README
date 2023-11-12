@@ -1,0 +1,31 @@
+# Profiling on Android
+## Instructions for profiling on android
+
+### On the phone
+1. Put phone on developer mode
+2. Enable Developer options
+3. Enable USB debugging
+
+
+### On laptop
+1. Install Android studio, atleast cli
+	1. adb command should be available
+	2. check if ndk folder is present in ~/Library/Android/(let me know if it is)
+2. Run command to ensure adb cli available:
+	`adb devices`
+3. Download correct benchmark library from https://www.tensorflow.org/lite/performance/measurement#native_benchmark_binary
+	1. Use `adb shell uname -m` to get name if needed
+4. (Not needed)Get simpleperf from `git clone https://android.googlesource.com/platform/prebuilts/simpleperf`
+
+### To do step by step
+1. Push model benchmarking script to phone
+	`adb push <benchmark_model> /data/local/tmp`
+2. Push tflite model to phone
+	`adb push <model-test>.tflite /data/local/tmp`
+3. To run inference
+	`adb shell taskset f0 /data/local/tmp/android_aarch64_benchmark_model --graph=/data/local/tmp/<model-test>.tflite --enable_op_profiling=true`
+4. Run with perf
+	`adb shell simpleperf record -e cpu-cycles,cache-references,cache-misses -o /data/local/tmp/simpleperf_data taskset f0 /data/local/tmp/<benchmark_model> --graph=/data/local/tmp/<model-test>.tflite`
+
+### To run scripts
+1. sh do_perf.sh <models-folder> <results-folder> <inf_summary>.csv <perf_summary>.csv
