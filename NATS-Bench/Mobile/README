@@ -29,3 +29,9 @@
 
 ### To run scripts
 1. sh do_perf.sh <models-folder> <results-folder> <inf_summary>.csv <perf_summary>.csv
+
+### Links
+- Simpleperf info: https://android.googlesource.com/platform/prebuilts/simpleperf/+/782cdf2ea6e33f2414b53884742d59fe11f01ebe/README.md
+- Simpleperf for ansroid article: https://tor-core.readthedocs.io/en/latest/HACKING/android/Simpleperf.html
+- TfLite benchmark tool article: https://android.googlesource.com/platform/external/tensorflow/+/refs/heads/android10-dev/tensorflow/lite/tools/benchmark/README.md
+- TfLite benchmark codebase: https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/tools/benchmark
