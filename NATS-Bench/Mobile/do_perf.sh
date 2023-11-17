@@ -37,17 +37,20 @@ for FILE in $FOLDER_NAME/*.tflite; do
         # Push the file to the device
         adb push "$FILE" /data/local/tmp/$BASENAME
 
+        # Run benchmark 50 times
+        adb shell taskset f0 /data/local/tmp/android_aarch64_benchmark_model --graph=/data/local/tmp/$BASENAME --enable_op_profiling=true > "$RESULTS_FOLDER/res-$MODEL_NAME.txt"
+
         # Start simpleperf record with specified events and run the benchmark
-        adb shell simpleperf record -e cpu-cycles,cache-references,cache-misses -o /data/local/tmp/simpleperf_data \
-        taskset f0 /data/local/tmp/android_aarch64_benchmark_model --graph=/data/local/tmp/$BASENAME --enable_op_profiling=true > "$RESULTS_FOLDER/res-$MODEL_NAME.txt"
+        adb shell simpleperf record -e cpu-cycles,cache-references,cache-misses,instructions -o /data/local/tmp/simpleperf_data \
+        taskset f0 /data/local/tmp/android_aarch64_benchmark_model --graph=/data/local/tmp/$BASENAME --enable_op_profiling=true --num_runs=1 >"simpleperf_inf_$MODEL_NAME.txt"
 
         # Pull the simpleperf data file
-        adb pull /data/local/tmp/simpleperf_data "simpleperf_report-$BASENAME.data"
+        adb pull /data/local/tmp/simpleperf_data "simpleperf_report-$MODEL_NAME.data"
 
         # Generate the simpleperf report
-        adb shell simpleperf report -i /data/local/tmp/simpleperf_data > "cache_report-$BASENAME.txt"
+        adb shell simpleperf report -i /data/local/tmp/simpleperf_data > "cache_report-$MODEL_NAME.txt"
 
-        SIMPLEPERF_REPORT_FILE="cache_report-$BASENAME.txt"
+        SIMPLEPERF_REPORT_FILE="cache_report-$MODEL_NAME.txt"
 
         bash "$SIMPLEPERF_PARSE_SCRIPT_PATH" "$SIMPLEPERF_REPORT_FILE" "$SIMPLEPERF_CSV_FILE"
 
@@ -55,7 +58,7 @@ for FILE in $FOLDER_NAME/*.tflite; do
         python3 "$INF_PARSE_SCRIPT_PATH" "$RESULTS_FOLDER/res-$MODEL_NAME.txt" "$TIMING_CSV_FILE"
 
         # Cleanup: remove temporary files
-        rm -f "simpleperf_report-$BASENAME.data" "cache_report-$BASENAME.txt"
+        rm -f "simpleperf_report-$MODEL_NAME.data" "cache_report-$MODEL_NAME.txt" "simpleperf_inf_$MODEL_NAME.txt"
         # rm -f "$RESULTS_FOLDER/res-$MODEL_NAME.txt"
         adb shell rm -f /data/local/tmp/simpleperf_data /data/local/tmp/$BASENAME
     fi

@@ -20,6 +20,8 @@
 ### To do step by step
 1. Push model benchmarking script to phone
 	`adb push <benchmark_model> /data/local/tmp`
+2. Give the model ex permissions
+	`adb shell chmod +x /data/local/tmp/<benchmark_model>`
 2. Push tflite model to phone
 	`adb push <model-test>.tflite /data/local/tmp`
 3. To run inference
@@ -28,7 +30,11 @@
 	`adb shell simpleperf record -e cpu-cycles,cache-references,cache-misses -o /data/local/tmp/simpleperf_data taskset f0 /data/local/tmp/<benchmark_model> --graph=/data/local/tmp/<model-test>.tflite`
 
 ### To run scripts
-1. sh do_perf.sh <models-folder> <results-folder> <inf_summary>.csv <perf_summary>.csv
+1. Push model benchmarking script to phone
+	`adb push <benchmark_model> /data/local/tmp`
+2. Give the model ex permissions
+	`adb shell chmod +x /data/local/tmp/<benchmark_model>`
+3. sh do_perf.sh <models-folder> <results-folder> <inf_summary>.csv <perf_summary>.csv
 
 ### Links
 - Simpleperf info: https://android.googlesource.com/platform/prebuilts/simpleperf/+/782cdf2ea6e33f2414b53884742d59fe11f01ebe/README.md
