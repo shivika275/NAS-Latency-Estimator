@@ -19,6 +19,8 @@ import torch.onnx
 import onnx
 from onnx_tf.backend import prepare
 from onnx import helper
+import tensorflow.lite as tflite
+
 
 def cuda_time() -> float:
     if torch.cuda.is_available():
@@ -27,11 +29,14 @@ def cuda_time() -> float:
 
 def measure(tflite_model, img_size, num_repeats=50, num_warmup=10):
     
+    
     # inputs = torch.randn(4, 3, img_size, img_size)
     inputs = np.random.rand(4, 3, img_size, img_size).astype(np.float32)
     
     interpreter = tf.lite.Interpreter(model_content=tflite_model)
     interpreter.allocate_tensors()
+
+
     input_details = interpreter.get_input_details()
 
     print(input_details)
@@ -51,6 +56,24 @@ def measure(tflite_model, img_size, num_repeats=50, num_warmup=10):
 
     drop = int(len(latencies) * 0.25)
     return np.mean(latencies[drop:-drop])
+
+def get_tflite_model(api,i,dataset='cifar10'):
+  config = api.get_net_config(i, dataset)
+  network = get_cell_based_tiny_net(config)
+  info = api.get_more_info(i, dataset)
+  cost = api.get_cost_info(i,dataset)
+  
+  if(dataset == 'ImageNet16-120'):
+    img_size = 128
+  else:
+    img_size = 32
+
+  # convert torch network to onnx
+  onnx_network = convert_to_onnx(network, img_size)
+  # convert onnx to tflite
+  tf_model = convert_onnx_to_tf_rep(onnx_model=onnx_network)
+
+  return tf_model
 
 def latency(api,i,dataset='cifar10'):
   config = api.get_net_config(i, dataset)
@@ -125,41 +148,46 @@ def convert_onnx_to_tf_rep(onnx_model, tf_model_path='model-test.pb'):
   return tflite_model
 
 
-api = create('NATS-tss-v1_0-3ffb9-simple', 'tss', fast_mode=True, verbose=False)
-print(len(api.meta_archs))
+def main():
+  
+  api = create('NATS-Bench/NATS-tss-v1_0-3ffb9-simple', 'tss', fast_mode=True, verbose=False)
+  print(len(api.meta_archs))
 
-root_dir = 'output_csv'
+  root_dir = 'output_csv'
 
-if torch.cuda.is_available():
-  hw = str(GPUtil.getGPUs()[0].name)
-else:
-  uname = platform.uname()
-  num_cores = multiprocessing.cpu_count()
-  memory_info = psutil.virtual_memory()
-  total_memory = memory_info.total
-  total_memory_gb = total_memory / (1024 ** 3)
-  hw = str(uname.machine) +'_'+str(uname.processor) +'_'+str(num_cores) +'_'+str(total_memory_gb)
+  if torch.cuda.is_available():
+    hw = str(GPUtil.getGPUs()[0].name)
+  else:
+    uname = platform.uname()
+    num_cores = multiprocessing.cpu_count()
+    memory_info = psutil.virtual_memory()
+    total_memory = memory_info.total
+    total_memory_gb = total_memory / (1024 ** 3)
+    hw = str(uname.machine) +'_'+str(uname.processor) +'_'+str(num_cores) +'_'+str(total_memory_gb)
 
-if(not(os.path.exists(os.path.join(root_dir,hw)))):
-  os.makedirs(os.path.join(root_dir,hw))
+  if(not(os.path.exists(os.path.join(root_dir,hw)))):
+    os.makedirs(os.path.join(root_dir,hw))
 
-latency_cifar10 = []
-latency_cifar100 = []
-latency_imagenet = []
+  latency_cifar10 = []
+  latency_cifar100 = []
+  latency_imagenet = []
 
-total_models = len(api.meta_archs)
-# total_models = 4
-for i in tqdm(range(total_models),total=total_models):
-  latency_cifar10.append(latency(api,i,'cifar10'))
-  latency_cifar100.append(latency(api,i,'cifar100'))
-  latency_imagenet.append(latency(api,i,'ImageNet16-120'))
+  total_models = len(api.meta_archs)
+  # total_models = 4
+  for i in tqdm(range(total_models),total=total_models):
+    latency_cifar10.append(latency(api,i,'cifar10'))
+    latency_cifar100.append(latency(api,i,'cifar100'))
+    latency_imagenet.append(latency(api,i,'ImageNet16-120'))
 
 
-all_cols = ['model', 'C','N','arch_str','test-acc','test-all-time','test-per-time','train-acc','train-all-time','train-per-time','flops','latency-gen','params','T-ori-test@epoch','T-ori-test@total','T-train@epoch','T-train@total','latency']
-df_cifar10 = pd.DataFrame(latency_cifar10,  columns=all_cols)
-df_cifar100 = pd.DataFrame(latency_cifar100,  columns=all_cols)
-df_imagenet = pd.DataFrame(latency_imagenet,  columns=all_cols)
+  all_cols = ['model', 'C','N','arch_str','test-acc','test-all-time','test-per-time','train-acc','train-all-time','train-per-time','flops','latency-gen','params','T-ori-test@epoch','T-ori-test@total','T-train@epoch','T-train@total','latency']
+  df_cifar10 = pd.DataFrame(latency_cifar10,  columns=all_cols)
+  df_cifar100 = pd.DataFrame(latency_cifar100,  columns=all_cols)
+  df_imagenet = pd.DataFrame(latency_imagenet,  columns=all_cols)
 
-df_cifar10.to_csv(os.path.join(root_dir,hw,'cifar10.csv'))
-df_cifar100.to_csv(os.path.join(root_dir,hw,'cifar100.csv'))
-df_imagenet.to_csv(os.path.join(root_dir,hw,'imagenet16.csv'))
+  df_cifar10.to_csv(os.path.join(root_dir,hw,'cifar10.csv'))
+  df_cifar100.to_csv(os.path.join(root_dir,hw,'cifar100.csv'))
+  df_imagenet.to_csv(os.path.join(root_dir,hw,'imagenet16.csv'))
+
+if __name__ == '__main__':
+  main()
