@@ -1,9 +1,0 @@
-Model Name,Event,Samples,Event Count
-model-test,cpu-cycles,4627,1618456945
-model-test,cache-references,4531,1123710456
-model-test,cache-misses,3756,28571371
-model-test,instructions,4574,3861133986
-model-test,cpu-cycles,4643,1614386358
-model-test,cache-references,4568,1125594352
-model-test,cache-misses,3716,29917889
-model-test,instructions,4772,3960660583

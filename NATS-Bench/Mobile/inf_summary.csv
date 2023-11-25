@@ -1,3 +1,0 @@
-Model Name,Initialization Time (ms),First Inference Time (us),Warmup Average Time (us),Inference Average Time (us),Memory Footprint Init (MB),Memory Footprint Overall (MB)
-model-test,4.972,13322,9904.12,9865.24,4.85547,9.68359
-model-test,4.616,12893,9883.02,9849.34,4.85547,9.69141
